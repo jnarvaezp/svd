@@ -1,3 +1,6 @@
+#!/bin/sh
+# Author Omar Ricardo Vargas Cárdenas <omar.vargas.cardenas at gmail.com>
+
 echo "Instalando el Sistema de Video Distribuido."
 
 echo "Listado de Pasos:"

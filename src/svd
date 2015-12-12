@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Author Omar Ricardo Vargas Cárdenas <omar.vargas.cardenas at gmail.com>
+
 # Este servicio es el que gestiona el funcionamiento del sistema
 # utilizando la pipe o tubo con nombre llama al script reproducirCarpeta
 # adicionalmente se espera poder gestionar todo el servicio de video a 

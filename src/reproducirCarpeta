@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Author Omar Ricardo Vargas Cárdenas <omar.vargas.cardenas at gmail.com>
+
 # A este script se le dan permisos de ejecucion para todos los usuarios
 # por medio del comando chmod 777 y se coloca en la carpeta /bin, de tal 
 # forma que todos los usuarios pueda usarlo como comando desde la consola

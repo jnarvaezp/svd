@@ -7,5 +7,6 @@
 # sera imposible el funcionamiento del sistema en total, este archivo
 # se coloca en la carpeta /etc/cron.hourly/ dando esto como resultado 
 # que la sincronizacion se lleve a cabo cada hora.
+# Author Omar Ricardo Vargas Cárdenas <omar.vargas.cardenas at gmail.com>
 
 /usr/sbin/ntpdate -u ntp.uniminuto.edu
