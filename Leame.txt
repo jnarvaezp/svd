@@ -1,0 +1,12 @@
+Este es el instalador del servicio de video distribuido:
+
+Pasos:
+
+1.  Prepare la imagen de Raspbian en la memoria SD. no olvide agregar la memoria de video 
+    y realizar la configuración de red, incluyendo proxy si es necesario. (proxy y archivo red adjuntos)
+    para la memoria de video verifique que en el archivo /boot/config.txt este el valor gpu_mem=128
+2. Descomprima el archivo SVDI.tar.gz
+3. Ingrese a la carpeta y ejecute el archivo install.sh, de ser necesario otorguele permisos de ejecucion 
+   y ejecutelo como administrador, el equipo debe estar conectado a internet ya que llevara a cabo la sincronizacion
+   con el servidor, esto creara todas las variables y carpetas necesarias para que el sistema funcione.
+4. Reinicie el equipo.

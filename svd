@@ -1,0 +1,156 @@
+#!/bin/bash
+
+# Este servicio es el que gestiona el funcionamiento del sistema
+# utilizando la pipe o tubo con nombre llama al script reproducirCarpeta
+# adicionalmente se espera poder gestionar todo el servicio de video a 
+# travesdel mismo, Para que ese script se ejecute en el arranque es 
+# necesario copiarlo en la carpeta /etc/init.d/ osteriormente darle 
+# permisos por medio del comando chmod 755 svd y finalmente 
+# actualizar el listado de servicios con el comando 
+# sudo update-rc.d svd defaults
+
+#!/bin/bash
+
+SERVER="10.1331.12.5"
+USER="bello"
+VIDEOPATHS="/home/bello/Biblioteca"
+HOMEPATHS="/home/bello"
+VIDEOPATH="/home/pi/Biblioteca"
+PIPEPATH="/home/pi/.tubo.pipe"
+HOMEPATH="/home/pi"
+PORT="57032"
+LISTA="listado.txt"
+TEMP="temporal"
+let ALIVE=0
+
+case "$1" in
+  start)
+	if [ ! -f $HOMEPATH/$PIPEPATH ];then
+	  echo "El tubo $HOMEPATH/$PIPEPATH NO existe, sera creado..."
+	  mkfifo $HOMEPATH/$PIPEPATH
+	fi
+	
+        reproducirCarpeta $VIDEOPATH < $PIPEPATH & > /dev/null
+        echo -n . > $PIPEPATH > /dev/null
+        ;;
+  status)
+        ps -ef | grep omxplayer.bin
+        ;;
+  play)
+        echo -n p > $PIPEPATH
+        ;;
+  next)
+        echo -n q > $PIPEPATH
+        ;;
+  restart)
+        sudo reboot
+        ;;
+  *)
+        echo "svd start | status | play | next | restart | synchronize "
+        ;;
+  synchronize)
+        ping -c 1 $SERVER > /dev/null 2>&1
+
+        if [ $? -eq 0 ]
+        then
+                ALIVE=1
+        fi
+
+        if [ $ALIVE -eq 1 ]
+        then
+	    	echo "Datos de sincronizacion: "
+		echo "Servidor: $SERVER"
+		echo "Usuario en el servidor: $USER"
+		echo "Carpeta de videos en el servidor: $VIDEOPATHS"
+		echo "Carpeta del usuario en el servidor: $HOMEPATHS"
+		echo "Carpeta donde se estan almacenando los videos localmente: $VIDEOPATH"
+		echo "Carpeta del usuario local $HOMEPATH"
+		echo "Puerto de conexion al servidor: $PORT"
+		echo "Nombre con el que se crea el listado localmente: $LISTA"
+		echo "Nombre del directorio temporal: $TEMP"
+		
+
+		if [ -d $HOMEPATH/$TEMP ];then
+			echo "El directorio $VIDEOPATH/$TEMP existe, sera eliminado..."
+			rm $HOMEPATH/$TEMP
+			echo "Directorio temporal eliminado..."
+		fi
+
+		if [ -d $VIDEOPATH ];then
+
+			echo "Renombrando Biblioteca a " $TEMP " ..."
+			mv $VIDEOPATH/ $HOMEPATH/$TEMP/
+			mkdir $VIDEOPATH
+
+			echo "Descargando lista a directorio local..."
+			scp -P $PORT $USER@$SERVER:$HOMEPATHS/$LISTA $HOMEPATH/
+
+			while read line
+			do
+			    echo "$line"
+			    if [ -f $HOMEPATH/$TEMP/"$line" ];then 
+			    
+				    echo "EL archivo -- $line -- existe, ahora vamos a verificar si hay cambios..."
+				    echo "Modificando linea para envio por ssh...."
+				    nline=${line//' '/'\ '}
+				    echo "$nline"
+				    echo "Calculando sumas MD5 entre..."
+
+				    sums=$(ssh -n -p $PORT $USER@$SERVER "md5sum $VIDEOPATHS/$nline")
+
+				    sumn=$(md5sum $HOMEPATH/$TEMP/"$line")
+
+				    echo "Verificando suma MD5..."
+				    
+				    sums=${sums:0:32}
+				    sumn=${sumn:0:32}		
+
+				    if [ "$sums" = "$sumn" ] ; then
+
+					echo "Las sumas concuerdan, los archivos son iguales..."
+					echo "El archivo se encuentra en su forma mas reciente..."
+					echo "Pasando el archivo a la Biblioteca..."
+					
+					mv $HOMEPATH/$TEMP/"$line" $VIDEOPATH/
+
+					echo "Archivo listo en la biblioteca..."
+
+				    else
+					echo "Las sumas NO concuerdan, los archivos son distintos..."
+					echo "Es necesario actualizar el archivo..."
+					echo "Borrando el archivo..."
+
+					rm $HOMEPATH/$TEMP/"$line"
+
+					echo "Descargando el archivo en la Biblioteca..."
+					
+					scp -P $PORT $USER@$SERVER:$VIDEOPATHS/"$nline" $VIDEOPATH/
+					
+					echo "Archivo listo en la biblioteca..."
+					
+				      fi
+			      else
+				    echo "El archivo -- $line  -- no existe..."
+				    echo "Descargando el archivo..."
+				    nline=${line//' '/'\ '}
+				    
+				    scp -P $PORT $USER@$SERVER:$VIDEOPATHS/"$nline" $VIDEOPATH/
+				    echo "Archivo listo en la biblioteca..."
+			      fi
+			done < $HOMEPATH/$LISTA
+
+			rm -r $HOMEPATH/$TEMP
+			rm $HOMEPATH/$LISTA
+		else
+			echo "El directorio Biblioteca no existe, se creara en $VIDEOPATH/..."
+			scp -r -P $PORT $USER@$SERVER:$VIDEOPATHS/ $HOMEPATH/
+			echo "Archivos copiados en la Biblioteca..."
+		fi
+
+		echo "Sincronizacion exitosa..."  
+        else
+	    echo "Server no esta disponible..."
+        fi
+        ;;
+esac
+

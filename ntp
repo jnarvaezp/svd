@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Este comando sincroniza la hora del equipo con el servidor ntp
+# de tal forma que la hora siempre va a ser la correcta, esto se
+# lleva a cabo para efectos de sincronizacion entre las tareas, 
+# dado que si las horas entre el servidor y las raspberries difieren
+# sera imposible el funcionamiento del sistema en total, este archivo
+# se coloca en la carpeta /etc/cron.hourly/ dando esto como resultado 
+# que la sincronizacion se lleve a cabo cada hora.
+
+/usr/sbin/ntpdate -u ntp.uniminuto.edu

@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# A este script se le dan permisos de ejecucion para todos los usuarios
+# por medio del comando chmod 777 y se coloca en la carpeta /bin, de tal 
+# forma que todos los usuarios pueda usarlo como comando desde la consola
+# de esta forma se evita que el scrip este visible en la carpeta del home
+# del usuario y agrega la funcionalidad a omxplayer de recibir un parametro
+# que es una direccion de un directorio para reproducirlo llamandolo de la
+# siguiente forma reproducirCarpeta /home/x/directorioVideos
+
+if [ -d "$1" ] ; then
+	    echo "La biblioteca musical existe...."
+    while true 
+    do
+      for entry in $1/*
+      do
+	clear
+	omxplayer "$entry" > /dev/null
+	clear
+      done
+    done
+else
+    echo "la carpeta" $1 "no existe..."
+fi
+

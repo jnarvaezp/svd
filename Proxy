@@ -1,0 +1,7 @@
+
+#copiar en /etc/apt/apt.conf.d/10proxy (10proxy es el nombre con el que debe guardar el archivo) usar url y no usar ip
+
+Acquire::http::proxy "proxy.uniminuto.edu:8080";
+Acquire::https::proxy "proxy.uniminuto.edu:8080";
+Acquire::ftp::proxy "proxy.uniminuto.edu:8080";
+ 
